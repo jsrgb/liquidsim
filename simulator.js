@@ -1,8 +1,15 @@
 const canvas = document.getElementById('simulatorCanvas');
 const ctx = canvas.getContext('2d');
 
-canvas.width = 800;
-canvas.height = 600;
+// Set initial canvas size
+function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+resizeCanvas();
+
+// Update canvas size on window resize
+window.addEventListener('resize', resizeCanvas);
 
 // Particle class to represent liquid particles
 class Particle {
