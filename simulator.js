@@ -55,6 +55,10 @@ class Particle {
         this.pressure = 0;
         this.fx = 0; // Forces
         this.fy = 0;
+        
+        // Create a Matter.js body
+        this.body = Bodies.circle(x, y, this.radius, { friction: 0, restitution: 0.3 });
+        World.add(engine.world, this.body);
     }
 
     computeDensity(particles) {
@@ -117,27 +121,21 @@ class Particle {
     }
 
     update() {
-        // Update velocity
+        // Update velocity from SPH forces
         this.vx += this.fx / this.density;
         this.vy += this.fy / this.density;
 
-        // Update position
-        this.x += this.vx;
-        this.y += this.vy;
+        // Apply velocity to Matter.js body
+        Matter.Body.setVelocity(this.body, { x: this.vx, y: this.vy });
 
-        // Simple boundary collision (to be replaced by Matter.js later)
-        if (this.y + this.radius > canvas.height) {
-            this.y = canvas.height - this.radius;
-            this.vy *= -0.3;
-        }
-        if (this.x + this.radius > canvas.width) {
-            this.x = canvas.width - this.radius;
-            this.vx *= -0.3;
-        }
-        if (this.x - this.radius < 0) {
-            this.x = this.radius;
-            this.vx *= -0.3;
-        }
+        // Sync position with Matter.js body
+        this.x = this.body.position.x;
+        this.y = this.body.position.y;
+    }
+    
+    // Remove Matter.js body when particle is removed
+    destroy() {
+        World.remove(engine.world, this.body);
     }
 
     draw() {
@@ -165,7 +163,11 @@ function animate() {
     particles.forEach(particle => particle.computeForces(particles));
 
     // Update and draw particles
-    particles = particles.filter(p => p.y < canvas.height + p.radius); // Remove particles off-screen
+    particles = particles.filter(p => {
+        if (p.y < canvas.height + p.radius) return true;
+        p.destroy(); // Clean up Matter.js body
+        return false;
+    });
     particles.forEach(particle => {
         particle.update();
         particle.draw();
@@ -202,6 +204,10 @@ function spawnParticle(e) {
 const resetButton = document.getElementById('resetButton');
 
 resetButton.addEventListener('click', () => {
+    // Clean up Matter.js bodies
+    particles.forEach(particle => {
+        particle.destroy();
+    });
     particles = [];
 });
 
