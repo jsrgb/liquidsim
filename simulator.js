@@ -1,19 +1,66 @@
 const canvas = document.getElementById('simulatorCanvas');
 const ctx = canvas.getContext('2d');
 
-// Set canvas size
 canvas.width = 800;
 canvas.height = 600;
 
+// Particle class to represent liquid particles
+class Particle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.vx = 0;
+        this.vy = 0;
+        this.radius = 3;
+    }
+
+    update() {
+        // Apply gravity
+        this.vy += 0.2;
+
+        // Update position
+        this.x += this.vx;
+        this.y += this.vy;
+
+        // Boundary collision
+        if (this.y + this.radius > canvas.height) {
+            this.y = canvas.height - this.radius;
+            this.vy *= -0.5; // Bounce with damping
+        }
+        if (this.x + this.radius > canvas.width) {
+            this.x = canvas.width - this.radius;
+            this.vx *= -0.5;
+        }
+        if (this.x - this.radius < 0) {
+            this.x = this.radius;
+            this.vx *= -0.5;
+        }
+    }
+
+    draw() {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = 'blue';
+        ctx.fill();
+        ctx.closePath();
+    }
+}
+
+// Array to store particles
+let particles = [];
+
 // Animation loop
 function animate() {
-    // Clear the canvas
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Request next frame
+    // Update and draw particles
+    particles.forEach(particle => {
+        particle.update();
+        particle.draw();
+    });
+
     requestAnimationFrame(animate);
 }
 
-// Start the animation loop
 animate();
