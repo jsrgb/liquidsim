@@ -62,7 +62,7 @@ class Particle {
     }
 
     computeDensity(particles) {
-        const h = 20; // Smoothing radius
+        const h = 30; // Increased smoothing radius for better interaction
         this.density = 0;
         const mass = 1; // Assume constant mass for simplicity
         particles.forEach(other => {
@@ -78,13 +78,13 @@ class Particle {
     }
 
     computePressure() {
-        const k = 200; // Gas constant
+        const k = 300; // Increased gas constant for more pressure
         const density0 = 1; // Rest density
         this.pressure = k * (this.density - density0);
     }
 
     computeForces(particles) {
-        const h = 20; // Smoothing radius
+        const h = 30; // Increased smoothing radius to match computeDensity
         this.fx = 0;
         this.fy = 0;
 
@@ -103,7 +103,7 @@ class Particle {
         });
 
         // Viscosity forces
-        const viscosity = 0.1;
+        const viscosity = 0.2; // Increased viscosity for smoother flow
         particles.forEach(other => {
             if (other === this) return;
             const dx = other.x - this.x;
@@ -141,7 +141,7 @@ class Particle {
     draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = 'blue';
+        ctx.fillStyle = 'rgba(0, 0, 255, 0.8)'; // Semi-transparent blue
         ctx.fill();
         ctx.closePath();
     }
@@ -194,6 +194,7 @@ canvas.addEventListener('mousemove', (e) => {
 });
 
 function spawnParticle(e) {
+    if (particles.length > 500) return; // Cap at 500 particles for performance
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
