@@ -55,12 +55,38 @@ function animate() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Update and draw particles
+    particles = particles.filter(p => p.y < canvas.height + p.radius); // Remove particles off-screen
     particles.forEach(particle => {
         particle.update();
         particle.draw();
     });
 
     requestAnimationFrame(animate);
+}
+
+let isMouseDown = false;
+
+canvas.addEventListener('mousedown', (e) => {
+    isMouseDown = true;
+    spawnParticle(e);
+});
+
+canvas.addEventListener('mouseup', () => {
+    isMouseDown = false;
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (isMouseDown) {
+        spawnParticle(e);
+    }
+});
+
+function spawnParticle(e) {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const particle = new Particle(x, y);
+    particles.push(particle);
 }
 
 animate();
