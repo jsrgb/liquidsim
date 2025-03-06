@@ -5,11 +5,43 @@ const ctx = canvas.getContext('2d');
 function resizeCanvas() {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+    
+    // Update Matter.js boundaries when canvas size changes
+    if (typeof engine !== 'undefined') {
+        World.remove(engine.world, [ground, leftWall, rightWall]);
+        createBoundaries();
+    }
 }
 resizeCanvas();
 
 // Update canvas size on window resize
 window.addEventListener('resize', resizeCanvas);
+
+// Initialize Matter.js engine
+const Engine = Matter.Engine;
+const World = Matter.World;
+const Bodies = Matter.Bodies;
+
+const engine = Engine.create();
+engine.world.gravity.y = 1; // Set gravity similar to current simulation
+
+// Create boundaries (static walls)
+let ground, leftWall, rightWall;
+
+function createBoundaries() {
+    ground = Bodies.rectangle(canvas.width / 2, canvas.height, canvas.width, 50, { isStatic: true });
+    leftWall = Bodies.rectangle(0, canvas.height / 2, 50, canvas.height, { isStatic: true });
+    rightWall = Bodies.rectangle(canvas.width, canvas.height / 2, 50, canvas.height, { isStatic: true });
+    
+    World.add(engine.world, [ground, leftWall, rightWall]);
+}
+
+createBoundaries();
+
+// Update Matter.js engine in animation loop
+function updateMatter() {
+    Engine.update(engine, 1000 / 60);
+}
 
 // Particle class to represent liquid particles
 class Particle {
@@ -60,6 +92,8 @@ let particles = [];
 function animate() {
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    updateMatter(); // Update Matter.js physics
 
     // Update and draw particles
     particles = particles.filter(p => p.y < canvas.height + p.radius); // Remove particles off-screen
