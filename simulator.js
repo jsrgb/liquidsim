@@ -89,4 +89,10 @@ function spawnParticle(e) {
     particles.push(particle);
 }
 
+const resetButton = document.getElementById('resetButton');
+
+resetButton.addEventListener('click', () => {
+    particles = [];
+});
+
 animate();
